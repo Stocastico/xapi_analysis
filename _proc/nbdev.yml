@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "xapi_analysis"
+  site-url: "https://Stocastico.github.io/xapi_analysis"
+  description: "Small library for data analysis of xAPI statements"
+  repo-branch: main
+  repo-url: "https://github.com/Stocastico/xapi_analysis"
