@@ -5,4 +5,5 @@ d = { 'settings': { 'branch': 'main',
                 'doc_host': 'https://Stocastico.github.io',
                 'git_url': 'https://github.com/Stocastico/xapi_analysis',
                 'lib_path': 'xapi_analysis'},
-  'syms': {'xapi_analysis.core': {'xapi_analysis.core.foo': ('core.html#foo', 'xapi_analysis/core.py')}}}
+  'syms': { 'xapi_analysis.core': {'xapi_analysis.core.foo': ('core.html#foo', 'xapi_analysis/core.py')},
+            'xapi_analysis.input': {'xapi_analysis.input.foo': ('input.html#foo', 'xapi_analysis/input.py')}}}
