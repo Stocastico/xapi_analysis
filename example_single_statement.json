@@ -1,0 +1,82 @@
+{
+  "stored": "2022-09-30T13:34:35.959Z",
+  "active": true,
+  "completedForwardingQueue": [],
+  "failedForwardingLog": [],
+  "client": "60ffcf8d448b2d059a63e3c4",
+  "lrs_id": "60ffcf8d448b2d059a63e3c3",
+  "completedQueues": [
+    "STATEMENT_FORWARDING_QUEUE",
+    "STATEMENT_PERSON_QUEUE",
+    "STATEMENT_QUERYBUILDERCACHE_QUEUE"
+  ],
+  "activities": [
+    "http://example.com/activities/student-lesson"
+  ],
+  "hash": "3268dd76c35a6077796979e0613654ecf449c46e",
+  "agents": [
+    "mailto:student@app.com"
+  ],
+  "statement": {
+    "authority": {
+      "objectType": "Agent",
+      "name": "New Client",
+      "mbox": "mailto:hello@learninglocker.net"
+    },
+    "stored": "2022-09-30T13:34:35.959Z",
+    "actor": {
+      "objectType": "Agent",
+      "name": "1s1116",
+      "mbox": "mailto:student@app.com"
+    },
+    "timestamp": "2022-09-30T13:34:35.959Z",
+    "version": "1.0.3",
+    "id": "1e355533-6924-493b-8f25-246144adc23c",
+    "result": {
+      "completion": true
+    },
+    "verb": {
+      "id": "http://id.tincanapi.com/verb/selected/",
+      "display": {
+        "en-US": "Selected"
+      }
+    },
+    "object": {
+      "objectType": "Activity",
+      "id": "http://example.com/activities/student-lesson",
+      "definition": {
+        "name": {
+          "en-US": "Lesson"
+        },
+        "description": {
+          "en-US": "Level 1 Module8 started"
+        }
+      }
+    }
+  },
+  "hasGeneratedId": false,
+  "deadForwardingQueue": [],
+  "voided": false,
+  "verbs": [
+    "http://id.tincanapi.com/verb/selected/"
+  ],
+  "personaIdentifier": "6103e17eaed02c30c695bffb",
+  "processingQueues": [],
+  "person": {
+    "_id": "6103e17eb196ba05dd9fdc52",
+    "display": "1-T-01-01"
+  },
+  "__v": 1,
+  "timestamp": "2022-09-30T13:34:35.959Z",
+  "relatedActivities": [
+    "http://example.com/activities/student-lesson"
+  ],
+  "relatedAgents": [
+    "mailto:student@app.com",
+    "mailto:hello@learninglocker.net"
+  ],
+  "organisation": "60faab70448b2d059a63e375",
+  "_id": "6336f06c6ce79d05ebef40a7",
+  "registrations": [],
+  "pendingForwardingQueue": []
+}
