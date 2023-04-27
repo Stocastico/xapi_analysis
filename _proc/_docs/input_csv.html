@@ -191,6 +191,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#to_lowercase" id="toc-to_lowercase" class="nav-link" data-scroll-target="#to_lowercase">to_lowercase</a></li>
   <li><a href="#remove_actors" id="toc-remove_actors" class="nav-link" data-scroll-target="#remove_actors">remove_actors</a></li>
   <li><a href="#remove_verbs" id="toc-remove_verbs" class="nav-link" data-scroll-target="#remove_verbs">remove_verbs</a></li>
+  <li><a href="#count_interactions" id="toc-count_interactions" class="nav-link" data-scroll-target="#count_interactions">count_interactions</a></li>
+  <li><a href="#subset_actor_verb" id="toc-subset_actor_verb" class="nav-link" data-scroll-target="#subset_actor_verb">subset_actor_verb</a></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/Stocastico/xapi_analysis/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
@@ -224,9 +226,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Set, List</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastcore.test <span class="im">import</span> <span class="op">*</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Set, List</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastcore.test <span class="im">import</span> <span class="op">*</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>As an example, in this package we provide a <code>csv</code> file containing around 1000 xAPI statements.</p>
 <div class="cell">
@@ -601,8 +605,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>test_df <span class="op">=</span> remove_verbs(statements, [<span class="st">"Logged In"</span>, <span class="st">"Logged Out"</span>])</span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>test_eq(get_all_verbs(test_df), test_verbs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="statement-analysys" class="level4">
-<h4 class="anchored" data-anchor-id="statement-analysys">Statement analysys</h4>
+<section id="xapi-statements-analysys" class="level4">
+<h4 class="anchored" data-anchor-id="xapi-statements-analysys">xAPI statements analysys</h4>
 <p>Here we present some functions that are typically applied when analysing xAPI statements data. For this, we will use a clean version of the statements dataset, where some of the functions described above has been applied</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>statements <span class="op">=</span> remove_whitespaces(statements, [<span class="st">"actor"</span>])</span>
@@ -677,9 +681,275 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 </div>
 </div>
-
-
+<p>A typical check is to evaluate how many interactions are provided by each actor:</p>
+<hr>
 </section>
+</section>
+<section id="count_interactions" class="level3">
+<h3 class="anchored" data-anchor-id="count_interactions">count_interactions</h3>
+<blockquote class="blockquote">
+<pre><code> count_interactions (df:pandas.core.frame.DataFrame)</code></pre>
+</blockquote>
+<p>Creates a new dataframe counting the total number of statements associated to each actor</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>df</td>
+<td>DataFrame</td>
+<td>The dataset containing the xAPI statements (one statement per row)</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>DataFrame</strong></td>
+<td><strong>A dataframe with the number of interactions of each actor</strong></td>
+</tr>
+</tbody>
+</table>
+<p>On our toy dataset, it looks like this:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>interactions <span class="op">=</span>  count_interactions(statements)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>interactions</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>actor</th>
+      <th>count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>pc009</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>pc006</td>
+      <td>13</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>pc008</td>
+      <td>19</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>pc002</td>
+      <td>21</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>pc004</td>
+      <td>32</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>pc007</td>
+      <td>42</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>pc003</td>
+      <td>43</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>iphone1</td>
+      <td>86</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>ipad1</td>
+      <td>87</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>android4</td>
+      <td>106</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>teacher</td>
+      <td>112</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>android1</td>
+      <td>119</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>tablet1</td>
+      <td>133</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>ipad2</td>
+      <td>140</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>tablet2</td>
+      <td>145</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>android2</td>
+      <td>147</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>sns.barplot(x<span class="op">=</span><span class="st">'count'</span>, y<span class="op">=</span><span class="st">'actor'</span>, data<span class="op">=</span>interactions, palette<span class="op">=</span><span class="st">'flare'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>&lt;Axes: xlabel='count', ylabel='actor'&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="01_input_csv_files/figure-html/cell-20-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>We can also extract specific statements associated to just one <strong>actor</strong> and representing just one <strong>verb</strong></p>
+<hr>
+</section>
+<section id="subset_actor_verb" class="level3">
+<h3 class="anchored" data-anchor-id="subset_actor_verb">subset_actor_verb</h3>
+<blockquote class="blockquote">
+<pre><code> subset_actor_verb (df:pandas.core.frame.DataFrame, actor:str, verb:str)</code></pre>
+</blockquote>
+<p>Returns the subset of the original dataframe containing only statements with the specified actor and verb</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>df</td>
+<td>DataFrame</td>
+<td>The dataset containing the xAPI statements (one statement per row)</td>
+</tr>
+<tr class="even">
+<td>actor</td>
+<td>str</td>
+<td>The actor we are interested in</td>
+</tr>
+<tr class="odd">
+<td>verb</td>
+<td>str</td>
+<td>The verb we are interested in</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>DataFrame</strong></td>
+<td><strong>A dataframe containing only the statements with a specific actor and verb</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>tmp <span class="op">=</span> subset_actor_verb(statements, <span class="st">"teacher"</span>, <span class="st">"Assigned"</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>tmp.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>timestamp</th>
+      <th>stored</th>
+      <th>actor</th>
+      <th>verb</th>
+      <th>object</th>
+      <th>result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>316</th>
+      <td>2023-03-10 12:04:36.832000+00:00</td>
+      <td>2023-03-10T12:04:36.832Z</td>
+      <td>teacher</td>
+      <td>Assigned</td>
+      <td>7.72;iPhone_1</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>368</th>
+      <td>2023-03-10 12:05:37.368000+00:00</td>
+      <td>2023-03-10T12:05:37.368Z</td>
+      <td>teacher</td>
+      <td>Assigned</td>
+      <td>8.15;Android2</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>397</th>
+      <td>2023-03-10 12:06:24.752000+00:00</td>
+      <td>2023-03-10T12:06:24.752Z</td>
+      <td>teacher</td>
+      <td>Assigned</td>
+      <td>7.72;Tablet1</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>541</th>
+      <td>2023-03-10 12:11:20.420000+00:00</td>
+      <td>2023-03-10T12:11:20.420Z</td>
+      <td>teacher</td>
+      <td>Assigned</td>
+      <td>7.45;Tablet_2</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>582</th>
+      <td>2023-03-10 12:12:12.001000+00:00</td>
+      <td>2023-03-10T12:12:12.001Z</td>
+      <td>teacher</td>
+      <td>Assigned</td>
+      <td>7.72;iPad2</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>From the subset we could analyse the <strong>objects</strong> to detect if there are any interesting patterns. In the example, we could extract the values (one is a score, the other the actor to whom it was assigned)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> split_column():</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">pass</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
 </section>
 
 </main> <!-- /main -->
