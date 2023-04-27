@@ -2,10 +2,11 @@
 
 # %% auto 0
 __all__ = ['load_statement', 'pretty_print_statement', 'get_value', 'get_actor', 'get_actor_name', 'get_verb', 'get_verb_str',
-           'get_object', 'get_object_definition', 'get_stored', 'get_timestamp', 'get_time_diff', 'is_active',
-           'is_voided', 'has_generated_id', 'get_client', 'get_LRS', 'get_id', 'get_persona_id', 'get_organisation',
-           'get_hash', 'get_completed_fw_queues', 'get_failed_fw_log', 'get_completed_queues',
-           'get_dead_forwarding_queues', 'get_pending_forwarding_queues', 'get_processing_queues', 'get_registrations']
+           'get_object', 'get_object_definition', 'get_object_description', 'get_stored', 'get_timestamp',
+           'get_time_diff', 'is_active', 'is_voided', 'has_generated_id', 'get_client', 'get_LRS', 'get_id',
+           'get_persona_id', 'get_organisation', 'get_hash', 'get_completed_fw_queues', 'get_failed_fw_log',
+           'get_completed_queues', 'get_dead_forwarding_queues', 'get_pending_forwarding_queues',
+           'get_processing_queues', 'get_registrations']
 
 # %% ../nbs/00_input_json.ipynb 8
 def load_statement(json_file: str # Filename of the json containing the statement
@@ -99,13 +100,13 @@ def get_object_definition(statement: dict, # Our xAPI statement imported from JS
     return st["object"]["definition"]["name"]["en-US"]
 
 # %% ../nbs/00_input_json.ipynb 27
-def get_object_definition(statement: dict, # Our xAPI statement imported from JSON
+def get_object_description(statement: dict, # Our xAPI statement imported from JSON
              ) -> str: # the object description
     """
     Quick access to the object description
     """
     st = get_value(statement, "statement")
-    return st["object"]["descripti"]["name"]["en-US"]
+    return st["object"]["definition"]["description"]["en-US"]
 
 # %% ../nbs/00_input_json.ipynb 31
 def get_stored(statement: dict, # Our xAPI statement imported from JSON
