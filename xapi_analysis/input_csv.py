@@ -2,7 +2,16 @@
 
 # %% auto 0
 __all__ = ['get_all_verbs', 'get_all_actors', 'get_all_objects', 'remove_whitespaces', 'to_lowercase', 'remove_actors',
-           'remove_verbs', 'count_interactions', 'subset_actor_verb', 'split_column', 'average_interactions']
+           'remove_verbs', 'count_interactions', 'create_barplot', 'subset_actor_verb', 'split_column',
+           'average_interactions']
+
+# %% ../nbs/01_input_csv.ipynb 4
+import pandas as pd
+import numpy as np
+from matplotlib import pyplot as plt
+import seaborn as sns
+from typing import Set, List
+from fastcore.test import *
 
 # %% ../nbs/01_input_csv.ipynb 10
 def get_all_verbs(df: pd.DataFrame # The dataset containing the xAPI statements (one statement per row)
@@ -77,7 +86,18 @@ def count_interactions(df: pd.DataFrame, # The dataset containing the xAPI state
     tmp.reset_index(inplace=True)
     return tmp
 
-# %% ../nbs/01_input_csv.ipynb 33
+# %% ../nbs/01_input_csv.ipynb 31
+def create_barplot(df: pd.DataFrame, # The input dataset
+                    x: str, # the column with the numerical variable to be plotted
+                    y: str, # the column with the name associated to each value 
+                    cmap: str = 'flare' # the color palette to be used
+                  ):
+    """
+    Creates an horizontal barplot of the data in the dataframe
+    """
+    sns.barplot(x=x, y=y, data=df, palette=cmap)
+
+# %% ../nbs/01_input_csv.ipynb 34
 def subset_actor_verb(df: pd.DataFrame, # The dataset containing the xAPI statements (one statement per row)
                       actor: str, # The actor we are interested in
                       verb: str # The verb we are interested in
@@ -87,7 +107,7 @@ def subset_actor_verb(df: pd.DataFrame, # The dataset containing the xAPI statem
     """
     return df[(df["actor"]==actor) & (df["verb"]==verb)]
 
-# %% ../nbs/01_input_csv.ipynb 36
+# %% ../nbs/01_input_csv.ipynb 37
 def split_column(df: pd.DataFrame, # The dataset containing the xAPI statements (one statement per row)
                  col: str, # The column in the dataset that should be split into multiple columns
                  col_names: List, # The names of the columns created after split
@@ -104,7 +124,7 @@ def split_column(df: pd.DataFrame, # The dataset containing the xAPI statements 
         print("The length of col_names should match the number of generated columns")
         return pd.DataFrame()
 
-# %% ../nbs/01_input_csv.ipynb 38
+# %% ../nbs/01_input_csv.ipynb 39
 def average_interactions(df: pd.DataFrame, # The dataset containing the xAPI statements (one statement per row)
                          avg_col: str, # The column on which to compute average
                          user_col: str = 'actor' # The column to groupby (usually **actor**)
