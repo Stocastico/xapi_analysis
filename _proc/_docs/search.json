@@ -11,21 +11,21 @@
     "href": "index.html",
     "title": "xapi_analysis",
     "section": "",
-    "text": "This file will become your README and also the index of your documentation."
+    "text": "This library provides the functions necessary to import and process xAPI statements, whether they are provided as JSON or csv files.\nThe documentation of the library provides tests and examples for the function, and it can be used as the starting point for analysing xAPI statements datasets."
   },
   {
     "objectID": "index.html#install",
     "href": "index.html#install",
     "title": "xapi_analysis",
     "section": "Install",
-    "text": "Install\npip install xapi_analysis"
+    "text": "Install\npip install git+https://github.com/stocastico/xapi_analysis.git"
   },
   {
     "objectID": "index.html#how-to-use",
     "href": "index.html#how-to-use",
     "title": "xapi_analysis",
     "section": "How to use",
-    "text": "How to use\nFill me in please! Don’t forget code examples:\n\n1+1\n\n2"
+    "text": "How to use\nAfter installing, import the modules in your Python code using the following calls\n\nfrom xapi_analysis.input_json import *\nfrom xapi_analysis.input_csv import *\n\nNameError: name 'Union' is not defined"
   },
   {
     "objectID": "input.html",
