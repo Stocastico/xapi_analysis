@@ -33,8 +33,8 @@ As an example, let’s just open a toy dataset of xAPI statements and run
 some functions on it
 
 ``` python
-csv_file = '../example_statements.csv'
-statements = pd.read_csv(csv_file, index_col=0, delimiter=',').reset_index(drop=True)
+csv_file = '../example_statements_4.csv'
+statements = import_csv(csv_file, index_col=0, delimiter=',')
 statements.head(5)
 ```
 
