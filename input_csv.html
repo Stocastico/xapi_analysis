@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.433">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="The methods in this notebook implement the functionalities for reading a collection of xAPI statements stored in a csv file">
+
+<title>xapi_analysis - Read xAPI statements stored in a csv file</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="xapi_analysis - Read xAPI statements stored in a csv file">
+<meta property="og:description" content="The methods in this notebook implement the functionalities for reading a collection of xAPI statements stored in a csv file">
+<meta property="og:image" content="https://Stocastico.github.io/xapi_analysis/01_input_csv_files/figure-html/cell-25-output-1.png">
+<meta property="og:site-name" content="xapi_analysis">
+<meta property="og:image:height" content="432">
+<meta property="og:image:width" content="607">
+<meta name="twitter:title" content="xapi_analysis - Read xAPI statements stored in a csv file">
+<meta name="twitter:description" content="The methods in this notebook implement the functionalities for reading a collection of xAPI statements stored in a csv file">
+<meta name="twitter:image" content="https://Stocastico.github.io/xapi_analysis/01_input_csv_files/figure-html/cell-25-output-1.png">
+<meta name="twitter:image-height" content="432">
+<meta name="twitter:image-width" content="607">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">xapi_analysis</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools ms-auto">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./input_csv.html">Read xAPI statements stored in a csv file</a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">xapi_analysis</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./input_json.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Read an input JSON statement</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./input_csv.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Read xAPI statements stored in a csv file</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#import_csv" id="toc-import_csv" class="nav-link active" data-scroll-target="#import_csv">import_csv</a></li>
+  <li><a href="#get_all_verbs" id="toc-get_all_verbs" class="nav-link" data-scroll-target="#get_all_verbs">get_all_verbs</a></li>
+  <li><a href="#get_all_actors" id="toc-get_all_actors" class="nav-link" data-scroll-target="#get_all_actors">get_all_actors</a></li>
+  <li><a href="#get_all_objects" id="toc-get_all_objects" class="nav-link" data-scroll-target="#get_all_objects">get_all_objects</a></li>
+  <li><a href="#remove_whitespaces" id="toc-remove_whitespaces" class="nav-link" data-scroll-target="#remove_whitespaces">remove_whitespaces</a></li>
+  <li><a href="#to_lowercase" id="toc-to_lowercase" class="nav-link" data-scroll-target="#to_lowercase">to_lowercase</a></li>
+  <li><a href="#remove_actors" id="toc-remove_actors" class="nav-link" data-scroll-target="#remove_actors">remove_actors</a></li>
+  <li><a href="#remove_verbs" id="toc-remove_verbs" class="nav-link" data-scroll-target="#remove_verbs">remove_verbs</a></li>
+  <li><a href="#count_interactions" id="toc-count_interactions" class="nav-link" data-scroll-target="#count_interactions">count_interactions</a></li>
+  <li><a href="#create_barplot" id="toc-create_barplot" class="nav-link" data-scroll-target="#create_barplot">create_barplot</a></li>
+  <li><a href="#subset_actor_verb" id="toc-subset_actor_verb" class="nav-link" data-scroll-target="#subset_actor_verb">subset_actor_verb</a></li>
+  <li><a href="#split_column" id="toc-split_column" class="nav-link" data-scroll-target="#split_column">split_column</a></li>
+  <li><a href="#average_interactions" id="toc-average_interactions" class="nav-link" data-scroll-target="#average_interactions">average_interactions</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/Stocastico/xapi_analysis/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Read xAPI statements stored in a csv file</h1>
+</div>
+
+<div>
+  <div class="description">
+    The methods in this notebook implement the functionalities for reading a collection of xAPI statements stored in a <code>csv</code> file
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<p>The libraries used:</p>
+<p>As an example, in this package we provide three <code>csv</code> files containing a few hundreds of xAPI statements.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>csv_files <span class="op">=</span> [<span class="st">'../example_statements_1.csv'</span>, <span class="st">'../example_statements_2.csv'</span>, <span class="st">'../example_statements_3.csv'</span>, </span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>            <span class="st">'../example_statements_4.csv'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="load-statements-from-file" class="level4">
+<h4 class="anchored" data-anchor-id="load-statements-from-file">Load statements from file</h4>
+<p>Let’s start by reading the csv file. This first example uses <code>;</code> as a delimiter, but usually it’s a <code>,</code>. We will shortly define a function that takes care of all the differences between xAPI statements datasets.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> Path(csv_files[<span class="dv">0</span>]).exists():</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    statements <span class="op">=</span> pd.read_csv(csv_files[<span class="dv">0</span>], index_col<span class="op">=</span><span class="va">None</span>, delimiter<span class="op">=</span><span class="st">';'</span>).reset_index(drop<span class="op">=</span><span class="va">True</span>) </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"The specified file does not exist. Creating an empty DataFrame..."</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    statements <span class="op">=</span> pd.DataFrame()</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>statements.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">timestamp</th>
+<th data-quarto-table-cell-role="th">lrs_id</th>
+<th data-quarto-table-cell-role="th">actor name</th>
+<th data-quarto-table-cell-role="th">verb id</th>
+<th data-quarto-table-cell-role="th">verb display</th>
+<th data-quarto-table-cell-role="th">object id</th>
+<th data-quarto-table-cell-role="th">object name</th>
+<th data-quarto-table-cell-role="th">result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>2022-08-02T14:44:34.4429540Z</td>
+<td>6148511b448b2d059a63e424</td>
+<td>AAA430802</td>
+<td>http://activitystrea.ms/schema/1.0/start</td>
+<td>{'en-us': 'started'}</td>
+<td>https://wekit-community.org/stepID=TS-ef86ff46...</td>
+<td>{'en-us': 'Action Step 3'}</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2022-08-02T14:44:34.0702380Z</td>
+<td>6148511b448b2d059a63e424</td>
+<td>AAA430802</td>
+<td>http://id.tincanapi.com/verb/viewed</td>
+<td>{'en-us': 'viewed'}</td>
+<td>http://MirageXR_Image_133039249801494090.jpg</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>2022-08-02T14:44:34.0626310Z</td>
+<td>6148511b448b2d059a63e424</td>
+<td>AAA430802</td>
+<td>http://activitystrea.ms/schema/1.0/listen</td>
+<td>{'en-us': 'listened_to'}</td>
+<td>http://characterinfo/TS-ef86ff46-70b6-472a-93d...</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>2022-08-02T14:44:34.0477250Z</td>
+<td>6148511b448b2d059a63e424</td>
+<td>AAA430802</td>
+<td>https://wekit-community.org/verb/met</td>
+<td>{'en-us': 'met'}</td>
+<td>resources:// char:Woman_C</td>
+<td>{'en-us': 'char:Woman_C'}</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>2022-08-02T14:43:28.0360420Z</td>
+<td>6148511b448b2d059a63e424</td>
+<td>AAA430802</td>
+<td>http://activitystrea.ms/schema/1.0/start</td>
+<td>{'en-us': 'started'}</td>
+<td>https://wekit-community.org/stepID=TS-a5780c27...</td>
+<td>{'en-us': 'Action Step 2'}</td>
+<td>NaN</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Ideally we want to have a more readable version of the content. We want to have three columns named <strong>actor</strong>, <strong>verb</strong> and <strong>object</strong> that contain the statement information in a readable format. We also would like to have the <strong>timestamp</strong> information as a <em>datetime</em> object, and we do not care about IDs, as they are usually random strings which are not needed in the data analysis. The function <a href="https://Stocastico.github.io/xapi_analysis/input_csv.html#import_csv"><code>import_csv</code></a> does all of this for us.</p>
+<hr>
+<p><a href="https://github.com/Stocastico/xapi_analysis/blob/main/xapi_analysis/input_csv.py#L20" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="import_csv" class="level3">
+<h3 class="anchored" data-anchor-id="import_csv">import_csv</h3>
+<blockquote class="blockquote">
+<pre><code> import_csv (csv_file:Union[str,pathlib.Path], index_col:int=0,
+             delimiter:str=',', quotechar:str='"')</code></pre>
+</blockquote>
+<p>Reads a csv file and perform some processing to make the data easier to read as well as easier to process afterwards. Returns a pandas Dataframe</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>csv_file</td>
+<td>typing.Union[str, pathlib.Path]</td>
+<td></td>
+<td>Filename of the csv with the data</td>
+</tr>
+<tr class="even">
+<td>index_col</td>
+<td>int</td>
+<td>0</td>
+<td>The index column</td>
+</tr>
+<tr class="odd">
+<td>delimiter</td>
+<td>str</td>
+<td>,</td>
+<td>the column delimiter</td>
+</tr>
+<tr class="even">
+<td>quotechar</td>
+<td>str</td>
+<td>”</td>
+<td>Quoting char. Ignore delimiter between this character</td>
+</tr>
+<tr class="odd">
+<td><strong>Returns</strong></td>
+<td><strong>DataFrame</strong></td>
+<td></td>
+<td><strong>The imported dataframe with all the xAPI statements</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Let’s use the function we just defined to reload the dataframe and check that it works as expected:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>statements <span class="op">=</span> import_csv(csv_files[<span class="dv">0</span>], index_col<span class="op">=</span><span class="va">None</span>, delimiter<span class="op">=</span><span class="st">';'</span>) </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>statements.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">timestamp</th>
+<th data-quarto-table-cell-role="th">actor</th>
+<th data-quarto-table-cell-role="th">result</th>
+<th data-quarto-table-cell-role="th">verb</th>
+<th data-quarto-table-cell-role="th">object</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>2022-08-02T14:44:34.4429540Z</td>
+<td>AAA430802</td>
+<td>NaN</td>
+<td>started</td>
+<td>Action Step 3</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2022-08-02T14:44:34.0702380Z</td>
+<td>AAA430802</td>
+<td>NaN</td>
+<td>viewed</td>
+<td>None</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>2022-08-02T14:44:34.0626310Z</td>
+<td>AAA430802</td>
+<td>NaN</td>
+<td>listened_to</td>
+<td>None</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>2022-08-02T14:44:34.0477250Z</td>
+<td>AAA430802</td>
+<td>NaN</td>
+<td>met</td>
+<td>char:Woman_C</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>2022-08-02T14:43:28.0360420Z</td>
+<td>AAA430802</td>
+<td>NaN</td>
+<td>started</td>
+<td>Action Step 2</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Just to make sure, let’s repeat the process for the other files. In some cases the function can be called with slightly different arguments, depending on the specific format of the file. For example, for the next file we specify a <em>quote character</em> and use a different delimiter</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>statements <span class="op">=</span> import_csv(csv_files[<span class="dv">1</span>], index_col<span class="op">=</span><span class="va">None</span>, delimiter<span class="op">=</span><span class="st">','</span>, quotechar<span class="op">=</span><span class="st">'"'</span>) </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>statements.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">timestamp</th>
+<th data-quarto-table-cell-role="th">actor</th>
+<th data-quarto-table-cell-role="th">object description</th>
+<th data-quarto-table-cell-role="th">result</th>
+<th data-quarto-table-cell-role="th">verb</th>
+<th data-quarto-table-cell-role="th">object</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>2022-06-24T08:46:28.169Z</td>
+<td>336078</td>
+<td>{'en-US': 'Pause/Leave app'}</td>
+<td>{"completion":true}</td>
+<td>pause app</td>
+<td>Pause</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2022-06-24T08:42:38.636Z</td>
+<td>336078</td>
+<td>{'en-US': 'Return to app'}</td>
+<td>{"completion":true}</td>
+<td>Return to app</td>
+<td>Return</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>2022-06-24T08:42:30.775Z</td>
+<td>336078</td>
+<td>{'en-US': 'Pause/Leave app'}</td>
+<td>{"completion":true}</td>
+<td>pause app</td>
+<td>Pause</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>2022-06-24T08:42:10.209Z</td>
+<td>336078</td>
+<td>{'en-US': 'Account 1s1115 logged in'}</td>
+<td>{"completion":true}</td>
+<td>Log In</td>
+<td>Access app</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>2022-06-23T09:14:19.815Z</td>
+<td>370445</td>
+<td>{'en-US': 'Pause/Leave app'}</td>
+<td>{"completion":true}</td>
+<td>pause app</td>
+<td>Pause</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Another file has additional columns that can be interesting, such as <em>language</em></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>statements <span class="op">=</span> import_csv(csv_files[<span class="dv">2</span>], index_col<span class="op">=</span><span class="va">None</span>, delimiter<span class="op">=</span><span class="st">','</span>) </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>statements.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">timestamp</th>
+<th data-quarto-table-cell-role="th">actor</th>
+<th data-quarto-table-cell-role="th">result</th>
+<th data-quarto-table-cell-role="th">language</th>
+<th data-quarto-table-cell-role="th">verb</th>
+<th data-quarto-table-cell-role="th">object</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>2022-07-14T10:58:11.295Z</td>
+<td>B78BFDBA-9CA9-4787-B2D4-7BD43F042135</td>
+<td>{"score":{"raw":0}}</td>
+<td>Romanian</td>
+<td>exit</td>
+<td>main_menu</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2022-07-14T10:57:56.684Z</td>
+<td>B78BFDBA-9CA9-4787-B2D4-7BD43F042135</td>
+<td>{"score":{"raw":0}}</td>
+<td>Romanian</td>
+<td>launched</td>
+<td>scene_game</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>2022-07-14T10:57:50.804Z</td>
+<td>B78BFDBA-9CA9-4787-B2D4-7BD43F042135</td>
+<td>{"score":{"raw":0}}</td>
+<td>Romanian</td>
+<td>exit</td>
+<td>main_menu</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>2022-07-14T10:57:42.154Z</td>
+<td>B78BFDBA-9CA9-4787-B2D4-7BD43F042135</td>
+<td>{"score":{"raw":0}}</td>
+<td>Romanian</td>
+<td>launched</td>
+<td>scene_maths_game</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>2022-07-14T10:57:28.866Z</td>
+<td>B78BFDBA-9CA9-4787-B2D4-7BD43F042135</td>
+<td>{"score":{"raw":0}}</td>
+<td>Romanian</td>
+<td>launched</td>
+<td>scene_tests</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Finally, some files (like the one we open now) have an index representing the number of statement in the first column, so we specify an <em>index_col</em></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>statements <span class="op">=</span> import_csv(csv_files[<span class="dv">3</span>], index_col<span class="op">=</span><span class="dv">0</span>, delimiter<span class="op">=</span><span class="st">','</span>) </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>statements.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">timestamp</th>
+<th data-quarto-table-cell-role="th">stored</th>
+<th data-quarto-table-cell-role="th">actor</th>
+<th data-quarto-table-cell-role="th">verb</th>
+<th data-quarto-table-cell-role="th">object</th>
+<th data-quarto-table-cell-role="th">result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>2023-03-10 11:45:09.638000+00:00</td>
+<td>2023-03-10T11:45:09.638Z</td>
+<td>Teacher</td>
+<td>Logged In</td>
+<td>Salesianos</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2023-03-10 11:52:00.020000+00:00</td>
+<td>2023-03-10T11:52:00.020Z</td>
+<td>PC006</td>
+<td>Logged In</td>
+<td>Salesianos</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>2023-03-10 11:52:04.063000+00:00</td>
+<td>2023-03-10T11:52:04.063Z</td>
+<td>PC008</td>
+<td>Logged In</td>
+<td>Salesianos</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>2023-03-10 11:52:05.177000+00:00</td>
+<td>2023-03-10T11:52:05.177Z</td>
+<td>Tablet1</td>
+<td>Logged In</td>
+<td>Salesianos</td>
+<td>{"score":{"raw":0}}</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>2023-03-10 11:52:05.679000+00:00</td>
+<td>2023-03-10T11:52:05.679Z</td>
+<td>PC004</td>
+<td>Logged In</td>
+<td>Salesianos</td>
+<td>NaN</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>The three most important columns are <strong>actor</strong>, <strong>verb</strong> and <strong>object</strong>, which create a sentence-like structure. We can see the actions that the app registers from the verb column.</p>
+<hr>
+<p><a href="https://github.com/Stocastico/xapi_analysis/blob/main/xapi_analysis/input_csv.py#L73" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="get_all_verbs" class="level3">
+<h3 class="anchored" data-anchor-id="get_all_verbs">get_all_verbs</h3>
+<blockquote class="blockquote">
+<pre><code> get_all_verbs (df:pandas.core.frame.DataFrame)</code></pre>
+</blockquote>
+<p>Returns a set with all verbs in the dataset</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>df</td>
+<td>DataFrame</td>
+<td>The dataset containing the xAPI statements (one statement per row)</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>typing.Set</strong></td>
+<td><strong>Set containing all the verbs occurring in the dataset</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>test_verbs <span class="op">=</span> {<span class="st">'Logged In'</span>, <span class="st">'Placed'</span>, <span class="st">'Swiped'</span>, <span class="st">'Asked'</span>, <span class="st">'Started'</span>, <span class="st">'Logged Out'</span>,</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>       <span class="st">'Accepted'</span>, <span class="st">'Set Turn'</span>, <span class="st">'Suggested'</span>, <span class="st">'Ran Out'</span>, <span class="st">'Sent'</span>, <span class="st">'Checked'</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>       <span class="st">'Assigned'</span>, <span class="st">'Canceled'</span>, <span class="st">'Ended'</span>}</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>test_eq(get_all_verbs(statements), test_verbs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We provide similar functions for <strong>actors</strong> and <strong>objects</strong></p>
+<hr>
+<p><a href="https://github.com/Stocastico/xapi_analysis/blob/main/xapi_analysis/input_csv.py#L81" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="get_all_actors" class="level3">
+<h3 class="anchored" data-anchor-id="get_all_actors">get_all_actors</h3>
+<blockquote class="blockquote">
+<pre><code> get_all_actors (df:pandas.core.frame.DataFrame)</code></pre>
+</blockquote>
+<p>Returns a set with all actors in the dataset</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>df</td>
+<td>DataFrame</td>
+<td>The dataset containing the xAPI statements (one statement per row)</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>typing.Set</strong></td>
+<td><strong>Set containing all the actors occurring in the dataset</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>test_actors <span class="op">=</span> {<span class="st">'Teacher'</span>, <span class="st">'PC006'</span>, <span class="st">'PC008'</span>, <span class="st">'Tablet1'</span>, <span class="st">'PC004'</span>, <span class="st">'PC009'</span>, <span class="st">'PC007'</span>, <span class="st">'PC003'</span>, <span class="st">'Iphone 1'</span>,</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>       <span class="st">'PC005'</span>, <span class="st">'iPad2'</span>, <span class="st">'Tablet 2'</span>, <span class="st">'Android1'</span>, <span class="st">'Android2'</span>, <span class="st">'iPad1'</span>, <span class="st">'PC002'</span>, <span class="st">'Android4'</span>, <span class="st">'Android3'</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>       <span class="st">'iphone 1'</span>, <span class="st">'iPhone 1'</span>, <span class="st">'Ipad1'</span>, <span class="st">'Tablet1 '</span>, <span class="st">'Ipad2'</span>}</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>test_eq(get_all_actors(statements), test_actors)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/Stocastico/xapi_analysis/blob/main/xapi_analysis/input_csv.py#L89" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="get_all_objects" class="level3">
+<h3 class="anchored" data-anchor-id="get_all_objects">get_all_objects</h3>
+<blockquote class="blockquote">
+<pre><code> get_all_objects (df:pandas.core.frame.DataFrame)</code></pre>
+</blockquote>
+<p>Returns a set with all objects in the dataset</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>df</td>
+<td>DataFrame</td>
+<td>The dataset containing the xAPI statements (one statement per row)</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>typing.Set</strong></td>
+<td><strong>Set containing all the objects occurring in the dataset</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The list of unique objects is quite big, so we will not print it in this example.</p>
+<p>As the <strong>actor</strong> values are usually associated to a user input (for example the username provided when starting the app), it makes sense to clean the values as to avoid that <em>User1</em>, <em>user1</em> and <em>user 1</em> are trated as the same user. The following functions allow to do just that, on the desired columns.</p>
+<hr>
+<p><a href="https://github.com/Stocastico/xapi_analysis/blob/main/xapi_analysis/input_csv.py#L97" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="remove_whitespaces" class="level3">
+<h3 class="anchored" data-anchor-id="remove_whitespaces">remove_whitespaces</h3>
+<blockquote class="blockquote">
+<pre><code> remove_whitespaces (df:pandas.core.frame.DataFrame, cols:List)</code></pre>
+</blockquote>
+<p>Removes whitespaces from the specified columns in the dataframe.</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>df</td>
+<td>DataFrame</td>
+<td>The dataset containing the xAPI statements (one statement per row)</td>
+</tr>
+<tr class="even">
+<td>cols</td>
+<td>typing.List</td>
+<td>the columns on which whitespaces should be removed</td>
+</tr>
+<tr class="odd">
+<td><strong>Returns</strong></td>
+<td><strong>DataFrame</strong></td>
+<td><strong>The dataframe after applying the function</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/Stocastico/xapi_analysis/blob/main/xapi_analysis/input_csv.py#L107" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="to_lowercase" class="level3">
+<h3 class="anchored" data-anchor-id="to_lowercase">to_lowercase</h3>
+<blockquote class="blockquote">
+<pre><code> to_lowercase (df:pandas.core.frame.DataFrame, cols:List)</code></pre>
+</blockquote>
+<p>Converts to lowercase the elements in the specified columns. The function only applies to columnns whose type is <em>str</em></p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>df</td>
+<td>DataFrame</td>
+<td>The dataset containing the xAPI statements (one statement per row)</td>
+</tr>
+<tr class="even">
+<td>cols</td>
+<td>typing.List</td>
+<td>the columns whose content should be made lowercase</td>
+</tr>
+<tr class="odd">
+<td><strong>Returns</strong></td>
+<td><strong>DataFrame</strong></td>
+<td><strong>The dataframe after applying the function</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>test_actors <span class="op">=</span> {<span class="st">'teacher'</span>, <span class="st">'pc006'</span>, <span class="st">'pc008'</span>, <span class="st">'tablet1'</span>, <span class="st">'pc004'</span>, <span class="st">'pc009'</span>, <span class="st">'pc007'</span>, <span class="st">'pc003'</span>, <span class="st">'iphone1'</span>,</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>               <span class="st">'pc005'</span>, <span class="st">'ipad2'</span>, <span class="st">'tablet2'</span>, <span class="st">'android1'</span>, <span class="st">'android2'</span>, <span class="st">'ipad1'</span>, <span class="st">'pc002'</span>, <span class="st">'android4'</span>, <span class="st">'android3'</span>}</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> remove_whitespaces(statements, [<span class="st">"actor"</span>])</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>df2 <span class="op">=</span> to_lowercase(df, [<span class="st">"actor"</span>])</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>test_eq(get_all_actors(df2), test_actors)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We may also be interested in removing specific rows from the dataset, for examples the ones associated to an <strong>actor</strong> that opted out of the intervention, or for <strong>verbs</strong> we do not care about. This could be the case for example for verbs like <em>Log In</em> or <em>Log out</em>, which provides information about when a user starts and stops the app, but may be not relevant in case our analysis is only about the interactions from within the app.</p>
+<hr>
+<p><a href="https://github.com/Stocastico/xapi_analysis/blob/main/xapi_analysis/input_csv.py#L118" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="remove_actors" class="level3">
+<h3 class="anchored" data-anchor-id="remove_actors">remove_actors</h3>
+<blockquote class="blockquote">
+<pre><code> remove_actors (df:pandas.core.frame.DataFrame, cols:List)</code></pre>
+</blockquote>
+<p>Removes from the dataframe all the rows whose actor is in the specified list</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>df</td>
+<td>DataFrame</td>
+<td>The dataset containing the xAPI statements (one statement per row)</td>
+</tr>
+<tr class="even">
+<td>cols</td>
+<td>typing.List</td>
+<td>the list of actors to remove</td>
+</tr>
+<tr class="odd">
+<td><strong>Returns</strong></td>
+<td><strong>DataFrame</strong></td>
+<td><strong>The dataframe with the specified actors removed</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>statements <span class="op">=</span> import_csv(csv_files[<span class="dv">3</span>], index_col<span class="op">=</span><span class="dv">0</span>, delimiter<span class="op">=</span><span class="st">','</span>) </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>test_actors <span class="op">=</span> {<span class="st">'Teacher'</span>, <span class="st">'PC006'</span>, <span class="st">'PC008'</span>, <span class="st">'Tablet1'</span>, <span class="st">'PC004'</span>, <span class="st">'PC009'</span>, <span class="st">'PC007'</span>, <span class="st">'PC003'</span>, <span class="st">'Iphone 1'</span>,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>       <span class="st">'PC005'</span>, <span class="st">'iPad2'</span>, <span class="st">'Tablet 2'</span>, <span class="st">'Android1'</span>, <span class="st">'Android2'</span>}</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>test_df <span class="op">=</span> remove_actors(statements, [<span class="st">'iPad1'</span>, <span class="st">'PC002'</span>, <span class="st">'Android4'</span>, <span class="st">'Android3'</span>,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>       <span class="st">'iphone 1'</span>, <span class="st">'iPhone 1'</span>, <span class="st">'Ipad1'</span>, <span class="st">'Tablet1 '</span>, <span class="st">'Ipad2'</span>])</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>test_eq(get_all_actors(test_df), test_actors)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/Stocastico/xapi_analysis/blob/main/xapi_analysis/input_csv.py#L127" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="remove_verbs" class="level3">
+<h3 class="anchored" data-anchor-id="remove_verbs">remove_verbs</h3>
+<blockquote class="blockquote">
+<pre><code> remove_verbs (df:pandas.core.frame.DataFrame, cols:List)</code></pre>
+</blockquote>
+<p>Removes from the dataframe all the rows whose actor is in the specified list</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>df</td>
+<td>DataFrame</td>
+<td>The dataset containing the xAPI statements (one statement per row)</td>
+</tr>
+<tr class="even">
+<td>cols</td>
+<td>typing.List</td>
+<td>the list of verbs to remove</td>
+</tr>
+<tr class="odd">
+<td><strong>Returns</strong></td>
+<td><strong>DataFrame</strong></td>
+<td><strong>The dataframe with the specified verbs removed</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>test_verbs <span class="op">=</span> {<span class="st">'Placed'</span>, <span class="st">'Swiped'</span>, <span class="st">'Asked'</span>, <span class="st">'Started'</span>, <span class="st">'Accepted'</span>, <span class="st">'Set Turn'</span>, <span class="st">'Suggested'</span>, <span class="st">'Ran Out'</span>,</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>              <span class="st">'Sent'</span>, <span class="st">'Checked'</span>, <span class="st">'Assigned'</span>, <span class="st">'Canceled'</span>, <span class="st">'Ended'</span>}</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>test_df <span class="op">=</span> remove_verbs(statements, [<span class="st">"Logged In"</span>, <span class="st">"Logged Out"</span>])</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>test_eq(get_all_verbs(test_df), test_verbs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="xapi-statements-analysis" class="level4">
+<h4 class="anchored" data-anchor-id="xapi-statements-analysis">xAPI statements analysis</h4>
+<p>Here we present some functions that are typically applied when analysing xAPI statements data. For this, we will use a clean version of the statements dataset, where some of the functions described above has been applied</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>statements <span class="op">=</span> remove_whitespaces(statements, [<span class="st">"actor"</span>])</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>statements <span class="op">=</span> to_lowercase(statements, [<span class="st">"actor"</span>])</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>statements <span class="op">=</span> remove_verbs(statements, [<span class="st">"Logged In"</span>, <span class="st">"Logged Out"</span>])</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>statements <span class="op">=</span> remove_actors(statements, [<span class="st">"android3"</span>])</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>statements.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">timestamp</th>
+<th data-quarto-table-cell-role="th">stored</th>
+<th data-quarto-table-cell-role="th">actor</th>
+<th data-quarto-table-cell-role="th">verb</th>
+<th data-quarto-table-cell-role="th">object</th>
+<th data-quarto-table-cell-role="th">result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">14</td>
+<td>2023-03-10 11:52:18.277000+00:00</td>
+<td>2023-03-10T11:52:18.277Z</td>
+<td>iphone1</td>
+<td>Placed</td>
+<td>Earth</td>
+<td>{"score":{"raw":0}}</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">15</td>
+<td>2023-03-10 11:52:18.847000+00:00</td>
+<td>2023-03-10T11:52:18.847Z</td>
+<td>iphone1</td>
+<td>Swiped</td>
+<td>Left</td>
+<td>{"score":{"raw":0}}</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">18</td>
+<td>2023-03-10 11:52:29.001000+00:00</td>
+<td>2023-03-10T11:52:29.001Z</td>
+<td>iphone1</td>
+<td>Placed</td>
+<td>Earth</td>
+<td>{"score":{"raw":0}}</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">19</td>
+<td>2023-03-10 11:52:29.094000+00:00</td>
+<td>2023-03-10T11:52:29.094Z</td>
+<td>android2</td>
+<td>Placed</td>
+<td>Earth</td>
+<td>{"score":{"raw":0}}</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">20</td>
+<td>2023-03-10 11:52:29.194000+00:00</td>
+<td>2023-03-10T11:52:29.194Z</td>
+<td>iphone1</td>
+<td>Swiped</td>
+<td>Right</td>
+<td>{"score":{"raw":0}}</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>A typical check is to evaluate how many interactions are provided by each actor:</p>
+<hr>
+<p><a href="https://github.com/Stocastico/xapi_analysis/blob/main/xapi_analysis/input_csv.py#L136" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+</section>
+<section id="count_interactions" class="level3">
+<h3 class="anchored" data-anchor-id="count_interactions">count_interactions</h3>
+<blockquote class="blockquote">
+<pre><code> count_interactions (df:pandas.core.frame.DataFrame)</code></pre>
+</blockquote>
+<p>Creates a new dataframe counting the total number of statements associated to each actor</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>df</td>
+<td>DataFrame</td>
+<td>The dataset containing the xAPI statements (one statement per row)</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>DataFrame</strong></td>
+<td><strong>A dataframe with the number of interactions of each actor</strong></td>
+</tr>
+</tbody>
+</table>
+<p>On our toy dataset, it looks like this:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>interactions <span class="op">=</span>  count_interactions(statements)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>interactions</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">actor</th>
+<th data-quarto-table-cell-role="th">count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>pc009</td>
+<td>6</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>pc006</td>
+<td>13</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>pc008</td>
+<td>19</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>pc002</td>
+<td>21</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>pc004</td>
+<td>32</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">5</td>
+<td>pc007</td>
+<td>42</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">6</td>
+<td>pc003</td>
+<td>43</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">7</td>
+<td>iphone1</td>
+<td>86</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">8</td>
+<td>ipad1</td>
+<td>87</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">9</td>
+<td>android4</td>
+<td>106</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">10</td>
+<td>teacher</td>
+<td>112</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">11</td>
+<td>android1</td>
+<td>119</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">12</td>
+<td>tablet1</td>
+<td>133</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">13</td>
+<td>ipad2</td>
+<td>140</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">14</td>
+<td>tablet2</td>
+<td>145</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">15</td>
+<td>android2</td>
+<td>147</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/Stocastico/xapi_analysis/blob/main/xapi_analysis/input_csv.py#L146" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="create_barplot" class="level3">
+<h3 class="anchored" data-anchor-id="create_barplot">create_barplot</h3>
+<blockquote class="blockquote">
+<pre><code> create_barplot (df:pandas.core.frame.DataFrame, x:str, y:str,
+                 cmap:str='flare')</code></pre>
+</blockquote>
+<p>Creates an horizontal barplot of the data in the dataframe</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>df</td>
+<td>DataFrame</td>
+<td></td>
+<td>The input dataset</td>
+</tr>
+<tr class="even">
+<td>x</td>
+<td>str</td>
+<td></td>
+<td>the column with the numerical variable to be plotted</td>
+</tr>
+<tr class="odd">
+<td>y</td>
+<td>str</td>
+<td></td>
+<td>the column with the name associated to each value</td>
+</tr>
+<tr class="even">
+<td>cmap</td>
+<td>str</td>
+<td>flare</td>
+<td>the color palette to be used</td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>create_barplot(interactions, <span class="st">'count'</span>, <span class="st">'actor'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="01_input_csv_files/figure-html/cell-25-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>We can also extract specific statements associated to just one <strong>actor</strong> and representing just one <strong>verb</strong></p>
+<hr>
+<p><a href="https://github.com/Stocastico/xapi_analysis/blob/main/xapi_analysis/input_csv.py#L157" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="subset_actor_verb" class="level3">
+<h3 class="anchored" data-anchor-id="subset_actor_verb">subset_actor_verb</h3>
+<blockquote class="blockquote">
+<pre><code> subset_actor_verb (df:pandas.core.frame.DataFrame, actor:str, verb:str)</code></pre>
+</blockquote>
+<p>Returns the subset of the original dataframe containing only statements with the specified actor and verb</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>df</td>
+<td>DataFrame</td>
+<td>The dataset containing the xAPI statements (one statement per row)</td>
+</tr>
+<tr class="even">
+<td>actor</td>
+<td>str</td>
+<td>The actor we are interested in</td>
+</tr>
+<tr class="odd">
+<td>verb</td>
+<td>str</td>
+<td>The verb we are interested in</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>DataFrame</strong></td>
+<td><strong>A dataframe containing only the statements with a specific actor and verb</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>subset <span class="op">=</span> subset_actor_verb(statements, <span class="st">"teacher"</span>, <span class="st">"Assigned"</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>subset.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">timestamp</th>
+<th data-quarto-table-cell-role="th">stored</th>
+<th data-quarto-table-cell-role="th">actor</th>
+<th data-quarto-table-cell-role="th">verb</th>
+<th data-quarto-table-cell-role="th">object</th>
+<th data-quarto-table-cell-role="th">result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">316</td>
+<td>2023-03-10 12:04:36.832000+00:00</td>
+<td>2023-03-10T12:04:36.832Z</td>
+<td>teacher</td>
+<td>Assigned</td>
+<td>7.72;iPhone_1</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">368</td>
+<td>2023-03-10 12:05:37.368000+00:00</td>
+<td>2023-03-10T12:05:37.368Z</td>
+<td>teacher</td>
+<td>Assigned</td>
+<td>8.15;Android2</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">397</td>
+<td>2023-03-10 12:06:24.752000+00:00</td>
+<td>2023-03-10T12:06:24.752Z</td>
+<td>teacher</td>
+<td>Assigned</td>
+<td>7.72;Tablet1</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">541</td>
+<td>2023-03-10 12:11:20.420000+00:00</td>
+<td>2023-03-10T12:11:20.420Z</td>
+<td>teacher</td>
+<td>Assigned</td>
+<td>7.45;Tablet_2</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">582</td>
+<td>2023-03-10 12:12:12.001000+00:00</td>
+<td>2023-03-10T12:12:12.001Z</td>
+<td>teacher</td>
+<td>Assigned</td>
+<td>7.72;iPad2</td>
+<td>NaN</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>From the subset we could analyse the <strong>objects</strong> to detect if there are any interesting patterns. In the example, we could extract the values (one is a score, the other the actor to whom it was assigned)</p>
+<hr>
+<p><a href="https://github.com/Stocastico/xapi_analysis/blob/main/xapi_analysis/input_csv.py#L167" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="split_column" class="level3">
+<h3 class="anchored" data-anchor-id="split_column">split_column</h3>
+<blockquote class="blockquote">
+<pre><code> split_column (df:pandas.core.frame.DataFrame, col:str, col_names:List,
+               sep:str=';')</code></pre>
+</blockquote>
+<p>Splits the column of the DataFrame into multiple columns, and return a new data</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>df</td>
+<td>DataFrame</td>
+<td></td>
+<td>The dataset containing the xAPI statements (one statement per row)</td>
+</tr>
+<tr class="even">
+<td>col</td>
+<td>str</td>
+<td></td>
+<td>The column in the dataset that should be split into multiple columns</td>
+</tr>
+<tr class="odd">
+<td>col_names</td>
+<td>typing.List</td>
+<td></td>
+<td>The names of the columns created after split</td>
+</tr>
+<tr class="even">
+<td>sep</td>
+<td>str</td>
+<td>;</td>
+<td>The separator between fiels inside the column we want to split</td>
+</tr>
+<tr class="odd">
+<td><strong>Returns</strong></td>
+<td><strong>DataFrame</strong></td>
+<td></td>
+<td><strong>A dataframe with the content <em>col</em> cplit into several columns</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>grades <span class="op">=</span> split_column(subset, <span class="st">'object'</span>, [<span class="st">'score'</span>, <span class="st">'student'</span>])</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>grades.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">score</th>
+<th data-quarto-table-cell-role="th">student</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">316</td>
+<td>7.72</td>
+<td>iPhone_1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">368</td>
+<td>8.15</td>
+<td>Android2</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">397</td>
+<td>7.72</td>
+<td>Tablet1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">541</td>
+<td>7.45</td>
+<td>Tablet_2</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">582</td>
+<td>7.72</td>
+<td>iPad2</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/Stocastico/xapi_analysis/blob/main/xapi_analysis/input_csv.py#L184" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="average_interactions" class="level3">
+<h3 class="anchored" data-anchor-id="average_interactions">average_interactions</h3>
+<blockquote class="blockquote">
+<pre><code> average_interactions (df:pandas.core.frame.DataFrame, avg_col:str,
+                       user_col:str='actor')</code></pre>
+</blockquote>
+<p>Similar to <a href="https://Stocastico.github.io/xapi_analysis/input_csv.html#count_interactions"><code>count_interactions</code></a>, but here creates a new dataframe averaging the statements associated to a specific column</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>df</td>
+<td>DataFrame</td>
+<td></td>
+<td>The dataset containing the xAPI statements (one statement per row)</td>
+</tr>
+<tr class="even">
+<td>avg_col</td>
+<td>str</td>
+<td></td>
+<td>The column on which to compute average</td>
+</tr>
+<tr class="odd">
+<td>user_col</td>
+<td>str</td>
+<td>actor</td>
+<td>The column to groupby (usually <strong>actor</strong>)</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>DataFrame</strong></td>
+<td></td>
+<td><strong>A new dataframe with the average of the interaction per specific value</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>grades[<span class="st">"score"</span>] <span class="op">=</span> grades[<span class="st">"score"</span>].astype(<span class="st">"float"</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>avg_grades <span class="op">=</span> average_interactions(grades, <span class="st">'score'</span>, <span class="st">'student'</span>)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>avg_grades</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">student</th>
+<th data-quarto-table-cell-role="th">score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Android4</td>
+<td>2.726667</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4</td>
+<td>Ipad2</td>
+<td>3.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">6</td>
+<td>Tablet1_</td>
+<td>4.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">11</td>
+<td>iphone_1</td>
+<td>5.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">10</td>
+<td>iPhone_1</td>
+<td>5.035000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Android1</td>
+<td>6.125000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">5</td>
+<td>Tablet1</td>
+<td>6.860000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Android2</td>
+<td>7.380000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">8</td>
+<td>iPad1</td>
+<td>7.500000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>Ipad1</td>
+<td>7.660000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">9</td>
+<td>iPad2</td>
+<td>7.720000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">7</td>
+<td>Tablet_2</td>
+<td>8.016667</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>create_barplot(avg_grades, <span class="st">'score'</span>, <span class="st">'student'</span>, cmap<span class="op">=</span><span class="st">'mako'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="01_input_csv_files/figure-html/cell-32-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
